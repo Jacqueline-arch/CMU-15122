@@ -1,0 +1,108 @@
+#use <conio>
+
+// use formula to calculate new channel 
+int new_channel (int p, int q, int k, int i)
+//@requires p>= 0 && p<256;
+//@requires q>=0 && q<256;
+//@requires k>=0;
+//@requires i>=1 && i<=k;
+//@ensures \result >= 0 && \result < 256;
+{
+  return ((k + 1 - i)*p + i*q)/(k+1);
+}
+
+//given two piexls, create the (i-1)th new pixel to be inserted. 
+pixel_t new_pixel(pixel_t p0, pixel_t q0, int k, int i)
+//@requires k>=0;
+//@requires i>=1 && i<=k;
+{
+  int new_alpha = new_channel(get_alpha(p0), get_alpha(q0), k, i);
+  int new_red = new_channel(get_red(p0), get_red(q0), k, i);
+  int new_green = new_channel(get_green(p0), get_green(q0), k, i);
+  int new_blue = new_channel(get_blue(p0), get_blue(q0), k, i);
+  return make_pixel(new_alpha, new_red, new_green, new_blue);
+}
+
+//given two pixels, create the pixel_t array to be inserted in between
+pixel_t[] to_be_inserted_pixels(pixel_t p0, pixel_t q0, int k)
+//@requires k>=0;
+{
+  pixel_t[] pixels_array = alloc_array(pixel_t, k);
+  for (int i = 1; i <= k; i ++)
+  {
+    pixels_array[i-1] = new_pixel(p0, q0, k, i);  
+  }
+  return pixels_array;
+}
+
+//create the horizontally streched image
+pixel_t[] stretch_horizontally(pixel_t[] pixels, int width, int height, int k)
+//@requires is_valid_imagesize(width, height);
+//@requires k >= 0;
+//@requires is_valid_imagesize( ((k+1)*width - k), height);
+{
+  int new_width = (k+1)*width - k;
+  int n = new_width * height;
+  pixel_t[] new_img_pixels = alloc_array(pixel_t, n);
+
+  for (int row = 0; row < height; row ++)
+  {
+    for (int col = 0; col < width - 1 ; col ++)
+    {
+       pixel_t p0 = pixels[get_index(row, col, width, height)];
+       pixel_t q0 = pixels[get_index(row,col + 1, width, height)];
+       pixel_t[] pixels_inbetween = to_be_inserted_pixels(p0, q0, k);
+       int new_index_p0 = get_index(row, col * k + col, new_width, height);
+       new_img_pixels[new_index_p0] = p0;
+       for (int i = 0; i<k; i++)
+       {
+         new_img_pixels[new_index_p0 + i + 1] = pixels_inbetween[i];
+       }
+    }
+    new_img_pixels[get_index(row,new_width-1,new_width,height)] = 
+      pixels[get_index(row, width-1, width, height)];
+  }
+
+  return new_img_pixels;
+}
+
+
+//create the eventually vertically streched image
+pixel_t[] stretch_vertically(pixel_t[] pixels, int width, int height, int k)
+//@requires is_valid_imagesize(width, height);
+//@requires k >= 0;
+//@requires is_valid_imagesize( ((k+1)*width - k), height);
+{
+  int new_height = (k+1)*height - k;
+  int n = width * new_height;
+  pixel_t[] new_img_pixels = alloc_array(pixel_t, n);
+
+  for (int col = 0; col < width; col ++)
+  {
+    for (int row = 0; row < height - 1 ; row ++)
+    {
+       pixel_t p0 = pixels[get_index(row, col, width, height)];
+       pixel_t q0 = pixels[get_index(row + 1,col, width, height)];
+       pixel_t[] pixels_inbetween = to_be_inserted_pixels(p0, q0, k);
+       int new_index_p0 = get_index(row *k + row, col, width, new_height);
+       new_img_pixels[new_index_p0] = p0;
+       for (int i = 0; i<k; i++)
+       {
+         new_img_pixels[new_index_p0 + (i + 1)*width] = pixels_inbetween[i];
+       }
+    }
+    new_img_pixels[get_index(new_height -1,col,width,new_height)] = 
+      pixels[get_index(height - 1, col, width, height)];
+  }
+
+  return new_img_pixels;
+}
+
+pixel_t[] upsize(pixel_t[] pixels, int width, int height, int k)
+{
+    pixel_t[] img_horizon = stretch_horizontally(pixels, width, height, k);
+
+    int new_width = (k+1)*width - k;
+    pixel_t[] img_final = stretch_vertically(img_horizon, new_width, height,k);
+    return img_final;
+}

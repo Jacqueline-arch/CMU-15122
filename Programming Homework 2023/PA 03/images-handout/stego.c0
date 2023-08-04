@@ -1,0 +1,105 @@
+#use <util>
+pixel_t hide_pixel(pixel_t coverpixel, pixel_t secretpixel, 
+int quality)
+
+{  //mutate coverpixel
+  int cover_alpha = get_alpha(coverpixel);
+  int cover_red = get_red(coverpixel);
+  int cover_green = get_green(coverpixel);
+  int cover_blue = get_blue(coverpixel);
+  int[] cover_array = alloc_array(int, 4);
+  cover_array[0] = cover_alpha;
+  cover_array[1] = cover_red;
+  cover_array[2] = cover_green;
+  cover_array[3] = cover_blue;
+  int[] new_cover_array = alloc_array(int, 4);
+  for (int i = 0; i < 4; i++)
+  {
+    int tmp = cover_array[i];
+    int tmp1 = tmp >> quality;
+    int tmp2 = tmp1 << quality;
+    new_cover_array[i] = tmp2;
+  }
+  //mutate secret pixel
+  int secret_alpha = get_alpha(secretpixel);
+  int secret_red = get_red(secretpixel);
+  int secret_green = get_green(secretpixel);
+  int secret_blue = get_blue(secretpixel);
+  int[] secret_array = alloc_array(int, 4);
+  secret_array[0] = secret_alpha;
+  secret_array[1] = secret_red;
+  secret_array[2] = secret_green;
+  secret_array[3] = secret_blue;
+  int[] new_secret_array = alloc_array(int, 4);
+  for (int j = 0; j < 4; j++)
+  {
+    int tmp3 = secret_array[j];
+    int tmp4 = tmp3 >> (8 - quality);
+    new_secret_array[j] = tmp4;
+  }
+
+  // starting hide
+  int[] hide_array = alloc_array(int, 4);
+  for ( int k = 0; k < 4; k++) 
+  {
+    hide_array[k] = new_cover_array[k] | new_secret_array[k];
+  }
+
+  pixel_t hide_pixel = make_pixel(hide_array[0], 
+                                  hide_array[1],  hide_array[2], hide_array[3]);
+
+
+  return hide_pixel;
+}
+
+
+pixel_t unhide_pixel(pixel_t hidepixel, int quality)
+//@requires 0 <= quality && quality <= 7;
+{
+  int alpha = get_alpha(hidepixel);
+  int red = get_red(hidepixel);
+  int green = get_green(hidepixel);
+  int blue = get_blue(hidepixel);
+  int m = 8 - quality;
+  int mask = 0xFF >> m;
+  return make_pixel((alpha & mask) << m, 
+                    (red & mask) << m, 
+                    (green & mask) << m, 
+                    (blue & mask) << m);
+}
+
+pixel_t[] hide(pixel_t[] cover, 
+               pixel_t[] secret, 
+               int width, int height, int quality)
+//@requires is_valid_imagesize(width, height);
+//@requires \length(cover) == width*height;
+//@requires \length(secret) == width*height;
+//@requires 0<= quality && quality <=7;
+//@ensures \length(\result) == width*height;
+//@ensures \result != cover && \result != secret;
+{
+  int n = width * height; 
+  pixel_t[] hide = alloc_array(pixel_t, n);   
+  for (int i = 0; i < n; i++) 
+  {
+    hide[i] = hide_pixel(cover[i], secret[i], quality);  
+  }
+  
+  return hide;
+}
+
+pixel_t[] unhide(pixel_t[] stego, int width, int height, int quality)
+//@requires is_valid_imagesize(width, height);
+//@requires \length(stego) == width*height;
+//@requires 0<= quality && quality <=7;
+//@ensures \length(\result) == width*height;
+//@ensures \result != stego;
+{
+  int n = width * height;
+  pixel_t[] unhide=alloc_array(pixel_t,n);
+  for (int i = 0; i < n; i++)
+  {
+    unhide[i] = unhide_pixel(stego[i], quality);
+  } 
+  return unhide;
+}

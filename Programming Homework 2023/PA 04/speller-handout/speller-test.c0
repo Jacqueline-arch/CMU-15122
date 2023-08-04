@@ -1,0 +1,86 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <conio>
+#use <parse>
+
+// You are welcome to define helper functions for your tests
+
+int main() {
+  // Create a few texts and dictionaries by hand
+  string[] dict1 =parse_tokens( "abc bcd cde def efg ");
+  int d1 = 5;
+  string w1 = "abb";
+  string w2 = "def";
+  assert(check_word(dict1, d1, w1) == false);
+  assert(check_word(dict1, d1, w2) == true);
+
+  // testcases for function mergesort 
+  string[] A = parse_tokens("sloths are cut sloths are slow algae fur");
+  int n = 8;
+  assert(mergesort(A, 0, 8) == 6);
+
+  string[] text2 = parse_tokens("you are a biiiit hello you");
+  int t2 = 6;
+  assert(mergesort(text2, 0, t2)==5);
+  // printf("%s\n", text2[0]);
+  // printf("%s\n", text2[1]);
+  // printf("%s\n", text2[2]);
+  // printf("%s\n", text2[3]);
+
+
+//testcase for function merge
+  string[] text3 = parse_tokens("are cute sloths junk algae are fur slow");
+  int lo1 = 0;
+  int hi1 = 3;
+  int lo2 = 4;
+  int hi2 = 8;
+  int result = merge(text3, lo1, hi1, lo2, hi2);
+  // printf("%s\n", text3[0]);
+  // printf("%s\n", text3[1]);
+  // printf("%s\n", text3[2]);
+  // printf("%s\n", text3[3]);
+  // printf("%s\n", text3[4]);
+  // printf("%s\n", text3[5]);
+  // printf("%s\n", text3[6]);
+  // printf("%s\n", text3[7]);
+
+
+
+  // Later on, read some texts and dictionaries from file
+  bundle_t SB1 = read_words("texts/small-dict.txt"); 
+  string[] dict2 = string_bundle_array(SB1);
+  int d2 = string_bundle_length(SB1);
+
+  bundle_t SB2 = read_words("texts/sloth.txt");
+  string[] text1 = string_bundle_array(SB2);
+  int t1=string_bundle_length(SB2);
+
+  bundle_t SB3 = read_words("texts/dict.txt");
+  string[] dict3 = string_bundle_array(SB3);
+  int d3=string_bundle_length(SB3);
+
+  bundle_t SB4 = read_words("texts/shakespeare.txt");
+  string[] text5 = string_bundle_array(SB4);
+  int t5=string_bundle_length(SB4);
+
+  string[] text4 = parse_tokens
+     ("trits other predatrs sin sloth sloth sped however");
+  int t4 = 8;
+
+
+
+
+
+  // Using them, test the functions check_word and check_text_better
+  // you wrote in file speller.c0
+  string[] miss = alloc_array(string, t5);
+  printf("%d\n",check_text_better(dict3, d3, text1, t1, miss));
+  // printf("%d\n",check_text_naive(dict2, d2, text1, t1, miss));
+  // assert(check_text_better(dict2, d2, text1, t1, miss) == 3);
+
+
+  printf("All tests passed!\n");
+  return 0;
+}

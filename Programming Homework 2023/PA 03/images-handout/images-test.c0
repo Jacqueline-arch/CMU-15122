@@ -1,0 +1,99 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <conio>
+#use <img>
+
+
+
+int main() {
+
+  // Create a few small images manually -- here's an example
+  pixel_t[] A = alloc_array(pixel_t, 4); // A is a 2x2 image
+  int width_A  = 2;
+  int height_A = 2;
+  A[0] = make_pixel(255, 255, 0, 0);     // A[0] is a red pixel
+  A[1] = make_pixel(255, 0, 255, 0);     // A[1] is a green pixel
+  A[2] = make_pixel(255, 0, 0, 255);     // A[2] is a blue pixel
+  A[3] = make_pixel(255, 255, 255, 0);   // A[3] is a yellow pixel
+  printf("Here's what the image looks like:\n");
+  image_print(A, width_A, height_A);
+
+  // Load some large images -- here's an example
+  image_t g5 = image_load("img/g5.png");
+  if (g5 == NULL) error("Could not load source image");
+  int width = image_width(g5);
+  int height = image_height(g5);
+  pixel_t[] inpixels = image_data(g5);
+  //@assert \length(inpixels) == width * height;
+  printf("Loaded image.  Dimensions are %d by %d.\n", width, height);
+
+
+  // Test the functions you implemented in imageutil.c0
+  //   on small and large images
+
+  // on small image
+  int index1 = 3;
+  int index2 = 0;
+  int index3 = 15;
+  int index4 = 1;
+  int index5 = 0;
+  assert(get_row(index1,width_A,height_A)== 1);
+  assert(get_row(index2, width_A,height_A) == 0);
+  assert(get_column(index1, width_A, height_A)== 1);
+  assert(get_column(index2,width_A,height_A)==0);
+  assert(is_valid_pixel(index1, index3,width_A,height_A)==false);
+  assert(get_index(index4, index5, width_A, height_A)==2);
+
+  //on large image
+  int index11=685;
+  int index22=1500;
+  int index33=700;
+  int index44=200;
+  int index55=300;
+
+  assert(get_row(index11,width,height)== 0);
+  assert(get_row(index22, width,height) == 1);
+  assert(get_column(index11, width, height)== 685);
+  assert(get_column(index22,width,height)==700);
+  assert(is_valid_pixel(index11, index33,width,height)==false);
+  assert(get_index(index44, index55, width, height)==160300);
+
+
+
+  // Test hide and unhide on your small images
+
+  //test hide_pixel function
+  pixel_t cover  = make_pixel(0xF3, 0x7A, 0x5B,0xE5);
+  pixel_t secret = make_pixel(0xE5, 0xFF, 0xC1, 0x00);
+  pixel_t result = make_pixel(0xFC, 0x7F, 0x58, 0xE0);
+  assert(hide_pixel(cover, secret,5) == result);
+
+  //test function unhide_pixel
+  pixel_t unhide_result = make_pixel(0xE0, 0xF8, 0xC0, 0x00);
+  assert(unhide_pixel(result, 5) == unhide_result);
+
+  
+
+
+
+  // Test crop on your small images
+  int left = 1;
+  int top = 1;
+  int new_width = 1;
+  int new_height = 1;
+  pixel_t[] cropped = alloc_array(pixel_t,1);
+  cropped[0] = A[3];
+  assert(crop(A, width_A, height_A, 
+              left, top, new_width, new_height)[0] == cropped[0]);
+
+
+
+  // Test upsize on your small images
+
+
+
+  printf("All tests passed!\n");
+  return 0;
+}

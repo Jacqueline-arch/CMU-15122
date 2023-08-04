@@ -1,0 +1,24 @@
+pixel_t[] crop(pixel_t[] pixels, int width, int height, 
+               int left, int top, int new_width, int new_height)
+//@requires is_valid_imagesize(width, height);
+//@requires is_valid_imagesize(new_width, new_height);
+//@requires \length(pixels) == width * height;
+//@requires is_valid_pixel(top, left, width, height);
+//@requires is_valid_pixel(top, left+new_width-1, width, height);
+//@requires is_valid_pixel(top + new_height-1, left, width, height);
+//@requires is_valid_pixel(top+new_height-1, left + new_width-1, width, height);
+//@ensures \length(\result) == new_width * new_height;
+{
+  int n = new_width * new_height;
+  pixel_t[] cropped_img = alloc_array(int, n);
+  for (int i = top; i< top + new_height; i++)
+  {
+    for (int j = left; j < left + new_width; j++)
+    {
+        int index_old = get_index(i, j, width, height);
+        int index_new = get_index( i - top, j - left, new_width, new_height);
+        cropped_img[index_new] = pixels[index_old];
+    }
+  }
+  return cropped_img;
+}

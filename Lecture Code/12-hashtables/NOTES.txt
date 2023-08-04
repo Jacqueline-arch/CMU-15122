@@ -1,3 +1,0 @@
-In F'16, I tried introducing generic pointers in this lecture because
-the lecture on generics was too dense.
---ic

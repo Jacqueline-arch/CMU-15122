@@ -1,0 +1,29 @@
+int result_width(int width, int height)
+//@requires is_valid_imagesize(width, height);
+//@ensures is_valid_imagesize(\result, height);
+{
+  int k = height/width;
+  return (k + 1)*width - k;    
+}
+
+int result_height(int width, int height)
+//@requires is_valid_imagesize(width, height);
+//@ensures is_valid_imagesize(width, \result);
+{   int k = width/height;
+    return (k + 1)*height - k;
+}
+
+pixel_t[] manipulate(pixel_t[] pixels, int width, int height)
+//@requires is_valid_imagesize(width, height);
+{
+  int new_width = result_width(width, height);
+  pixel_t[] stretch_horizon = 
+    stretch_horizontally(pixels, width, height, height/width);
+
+
+  pixel_t[] stretch_ver = 
+    stretch_vertically(stretch_horizon, 
+                       new_width, height, width/height);
+  return stretch_ver;
+
+}

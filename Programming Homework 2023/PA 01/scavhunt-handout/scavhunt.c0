@@ -1,0 +1,22 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+// Allows you to use I/O functions like printf
+#use <conio>
+// Allows you to use string functions like string_join
+#use <string>
+// Allows you to use utility functions like abs() and min()
+#use <util>
+
+string greet(string salutation, string entity) {
+  string str = salutation;
+  str = string_join(str, ", ");
+  str = string_join(str, entity);
+  str = string_join(str, "!");
+  return str;
+}
+string foo() {
+  string test = "hello";
+  return test;
+}

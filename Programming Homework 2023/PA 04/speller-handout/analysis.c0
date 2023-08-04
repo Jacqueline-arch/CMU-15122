@@ -1,0 +1,76 @@
+#use <args>
+#use <conio>
+
+
+int main()
+{
+  args_t args= args_parse();
+  int argc = args -> argc;
+  string [] argv = args -> argv;
+
+
+  bundle_t SB1 =  read_words(argv[0]);
+  string[] dict = string_bundle_array(SB1);
+  int d = string_bundle_length(SB1);
+
+  bundle_t SB2 = read_words(argv[1]);
+  string[] text = string_bundle_array(SB2);
+  int t = string_bundle_length(SB2);
+
+  string[] miss = alloc_array(string, t);
+
+  int k = check_text_better(dict, d, text, t, miss );
+  printf("%s %d %s\n","There are", k, "misspelled words in the text.");
+ 
+  
+  int c_8 = 0;
+
+  string[] len15 = alloc_array(string, 4);
+  int j = 0;
+  int empty_space = 0;
+
+  for (int i = 0; i < k; i++)
+  {
+    if(string_length(miss[i]) == 8)
+    {
+      c_8 ++;
+    }
+    if (string_length(miss[i]) == 15 && j<4)
+    {
+
+      len15[j] = miss[i];
+      j++;
+    }
+    if (string_length(miss[i]) == 0)
+    {
+      empty_space ++;
+    }
+    
+  }
+  string last_word = miss[k-empty_space-1];
+  int ct_last = 0;
+  for (int i = 0; i <t; i++)
+  {
+    if (string_equal(text[i],last_word))
+    {
+      ct_last ++;
+    }
+  }
+
+
+  printf("%s %d %s\n", "There are", c_8, 
+         "misspelled words of length 8 in the text.");
+  printf("%s\n", 
+         "Here are the first 4 misspelled words of length 15 in the text:");
+  for (int i = 0; i < 4; i++)
+  {
+    printf("%d. %s\n", i+1, len15[i]);
+
+  }
+
+  printf("%s %s %s %d %s\n", 
+         "The alphabetically-last misspelled word in the text is",   
+         last_word, 
+         "and appears", ct_last, "times.");
+  return 0;
+}
