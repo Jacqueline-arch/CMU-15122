@@ -47,10 +47,6 @@ queue_t def_queue(string name,queue_t Q)
     string tmp = deq(Q);
     if (string_equal(tmp, ";"))
     {
-      if(queue_empty(def))
-      {
-        error(string_join("no contents for ", name));
-      }
       return def;  
     }
     enq(def, tmp);  
@@ -102,10 +98,7 @@ bool check_queue_size(queue_t Q, int n)
     enq(Q, deq(tmp));
   }
   if (ct >= n) return true;
-  else
-  {
-    error("not enough tokens on queue");
-  } 
+  error("not enough tokens on queue");  
 }
 
 
@@ -183,11 +176,8 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
         {
           error("incorrect input number");
         }
-        else
-        {
-          int ans = x / y;
-          push(S, ans);
-        }
+        int ans = x / y;
+        push(S, ans);
       }
     } 
 
@@ -201,11 +191,8 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
         {
           error("incorrect input number");
         }
-        else
-        {
-          int ans = x % y;
-          push(S, ans);
-        }
+        int ans = x % y;
+        push(S, ans);
       }
     }  
     
@@ -217,17 +204,14 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
         int x = pop(S);
         if (y < 0)
         {
-          error("undefined behavior");
+          error("exponent must be non-negative");
         }
-        else
+        int ans = 1;
+        for (int i = 0; i < y; i++)
         {
-          int ans = 1;
-          for (int i = 0; i < y; i++)
-          {
-            ans = ans * x;
-          }
-          push(S, ans);
+          ans = ans * x;
         }
+        push(S, ans);
       }
     }
 
@@ -250,6 +234,7 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
         
       }
     } 
+    
     else if (string_equal(tok, "drop"))
     {
       if(check_stack_size(S, 1))
@@ -307,51 +292,47 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
       if (check_stack_size(S, 1))
       {
         int n = pop(S);
-        if (n > 0)
+        if (n <= 0)
         {
-          if(check_stack_size(S, n))
+          error("pick number must be positive");
+        }
+        if(check_stack_size(S, n))
+        {
+          stack_t tmp = stack_new();
+          for (int i = 0; i < n; i++)
           {
-            stack_t tmp = stack_new();
-            for (int i = 0; i < n; i++)
-            {
-              int node = pop(S);
-              push(tmp, node);
-            }
-            int Xn=pop(tmp);
-            push(S, Xn);
-            while(!stack_empty(tmp))
-            {
-              push(S, pop(tmp));
-            }
-            push(S, Xn);
+            int node = pop(S);
+            push(tmp, node);
           }
-        }
-        else
-        {
-          error("pick number must be pisitive");
-        }
+          int Xn=pop(tmp);
+          push(S, Xn);
+          while(!stack_empty(tmp))
+          {
+            push(S, pop(tmp));
+          }
+          push(S, Xn);
+        }       
       }
     }
+
+
     else if (string_equal(tok, "skip"))
     {
       if (check_stack_size(S, 1))
       {
         int n = pop(S);
-        if (n>=0)
-        {
-          if (check_queue_size(Q,n))
-          {
-            while (n>0)
-            {
-              deq(Q);
-              n--;
-            }
-          }
-        }
-        else
+        if (n<0)
         {
           error("skip number must be non-negative");
         }
+        if (check_queue_size(Q,n))
+        {
+          while (n>0)
+          {
+            deq(Q);
+            n--;
+          }
+        }       
       }
     }
     
