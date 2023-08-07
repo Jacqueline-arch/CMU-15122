@@ -18,13 +18,97 @@
  * abstract type. (typedef ____* state_t) This file contains the
  * implementation of the state_t type. You will need to modify
  * this type when you do task 3. */
-typedef bool* state_t;  // MODIFY ME
+typedef struct state_header state; 
+struct state_header {
+  dict_t dict;
+  qstack_t r_stack;
+};
+
+typedef state* state_t;  // MODIFY ME
+
 state_t init_state()
 //@ensures \result != NULL;
 {
-  // UPDATE ME
-  return alloc(bool);  // MODIFY ME
+  state_t ST = alloc(state);
+  ST->dict = dict_new();
+  ST->r_stack = qstack_new();
+  return ST;  // MODIFY ME
 }
+
+queue_t def_queue(string name,queue_t Q)
+{
+  if (queue_empty(Q))
+  {
+    error(string_join("no contents for definition of", name));
+  }
+  queue_t def = queue_new();
+  while (!queue_empty(Q))
+  {    
+    string tmp = deq(Q);
+    if (string_equal(tmp, ";"))
+    {
+      if(queue_empty(def))
+      {
+        error(string_join("no contents for ", name));
+      }
+      return def;  
+    }
+    enq(def, tmp);  
+  }
+  error(string_join(name, "definiton does not end."));
+}
+
+
+
+//check if a stack has number n elements.
+bool check_stack_size(stack_t S, int n)
+//@requires S!= NULL;
+//@requires n > 0;
+{
+  stack_t tmp = stack_new();
+  while (!stack_empty(S) && n != 0)
+  //@loop_invariant n >= 0;
+  {
+    push(tmp, pop(S));
+    n --;
+  }
+  while(!stack_empty(tmp))
+  {
+    push(S, pop(tmp));
+  }
+  //@assert n >= 0 || stack_empty(S);
+  if (n == 0) return true;
+  else
+  {
+    error("not enough elements on stack");
+  }
+}
+
+//check if a queue has number n elements.
+bool check_queue_size(queue_t Q, int n)
+//@requires Q!= NULL;
+//@requires n > 0;
+{
+  queue_t tmp = queue_new();
+  int ct = 0;
+  while (!queue_empty(Q))
+  {
+    enq(tmp, deq(Q));
+    ct++;
+  }
+  //@assert queue_empty(Q);
+  while(!queue_empty(tmp))
+  {
+    enq(Q, deq(tmp));
+  }
+  if (ct >= n) return true;
+  else
+  {
+    error("not enough tokens on queue");
+  } 
+}
+
+
 
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
@@ -35,25 +119,288 @@ bool eval(queue_t inputQ, stack_t S, state_t ST)
 {
   queue_t Q = inputQ;
 
-  while (!queue_empty(Q)) {
+  while (!queue_empty(Q)) 
+  {
     string tok = deq(Q); /* Is this dequeue safe? */
     // Uncommenting these lines might help with debugging:
-    // printf("Read: %s\n", tok);
-    if (string_equal(tok, "print")) {
-      int x = pop(S); /* This line is unsafe and must be fixed! */
-      printf("%d\n", x);
-    } else if (string_equal(tok, "quit")) {
+    printf("Read: %s\n", tok);
+    
+    if (string_equal(tok, "print")) 
+    {
+      int n = 1;
+      if (check_stack_size(S, n))
+      {
+        int x = pop(S); /* This line is unsafe and must be fixed! */
+        printf("%d\n", x);
+      }
+    } 
+    
+    else if (string_equal(tok, "quit")) 
+    {
       return false;
-    } else {
+    }
+    
+    else if (string_equal(tok, "+")) 
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        int ans = x + y;
+        push(S, ans);
+      }
+     }
+
+    else if (string_equal(tok, "-")) 
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        int ans = x - y;
+        push(S, ans);
+      }
+    }
+
+    else if (string_equal(tok, "*"))
+    {
+      if(check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        int ans = x * y;
+        push(S, ans);
+      }
+    }   
+
+    else if (string_equal(tok, "/"))
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        if (y == 0 || (x == int_min() && y == -1 ))
+        {
+          error("incorrect input number");
+        }
+        else
+        {
+          int ans = x / y;
+          push(S, ans);
+        }
+      }
+    } 
+
+    else if (string_equal(tok, "%"))
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        if (y == 0 || (x == int_min() && y == -1 ))
+        {
+          error("incorrect input number");
+        }
+        else
+        {
+          int ans = x % y;
+          push(S, ans);
+        }
+      }
+    }  
+    
+    else if (string_equal(tok, "**"))
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        if (y < 0)
+        {
+          error("undefined behavior");
+        }
+        else
+        {
+          int ans = 1;
+          for (int i = 0; i < y; i++)
+          {
+            ans = ans * x;
+          }
+          push(S, ans);
+        }
+      }
+    }
+
+    else if (string_equal(tok, "<"))
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        int ans;
+        if ( x < y)
+        {
+          ans = 1;
+        }
+        else
+        {
+          ans = 0;
+        }
+        push(S, ans);
+        
+      }
+    } 
+    else if (string_equal(tok, "drop"))
+    {
+      if(check_stack_size(S, 1))
+      {
+        pop(S);
+      }
+    }
+
+    else if (string_equal(tok, "swap"))
+    {
+      if (check_stack_size(S, 2))
+      {
+        int y = pop(S);
+        int x = pop(S);
+        push(S, y);
+        push(S, x);
+      }
+    }
+
+    else if (string_equal(tok, "rot"))
+    {
+      if (check_stack_size(S, 3))
+      {
+        int z = pop(S);
+        int y = pop(S);
+        int x = pop(S);
+        push(S, y);
+        push(S, z);
+        push(S, x);
+      }
+    }
+
+    else if (string_equal(tok, "if"))
+    {
+      if (check_stack_size(S, 1))
+      {
+        int x = pop(S); 
+        if (x == 0)
+        {
+          int m = 3;
+          if (check_queue_size(Q,m))
+          {
+            while(m>0)
+            {
+              deq(Q);
+              m--;
+            }
+          }
+        }
+      }
+    }
+
+    else if (string_equal(tok, "pick"))
+    {
+      if (check_stack_size(S, 1))
+      {
+        int n = pop(S);
+        if (n > 0)
+        {
+          if(check_stack_size(S, n))
+          {
+            stack_t tmp = stack_new();
+            for (int i = 0; i < n; i++)
+            {
+              int node = pop(S);
+              push(tmp, node);
+            }
+            int Xn=pop(tmp);
+            push(S, Xn);
+            while(!stack_empty(tmp))
+            {
+              push(S, pop(tmp));
+            }
+            push(S, Xn);
+          }
+        }
+        else
+        {
+          error("pick number must be pisitive");
+        }
+      }
+    }
+    else if (string_equal(tok, "skip"))
+    {
+      if (check_stack_size(S, 1))
+      {
+        int n = pop(S);
+        if (n>=0)
+        {
+          if (check_queue_size(Q,n))
+          {
+            while (n>0)
+            {
+              deq(Q);
+              n--;
+            }
+          }
+        }
+        else
+        {
+          error("skip number must be non-negative");
+        }
+      }
+    }
+    
+    //feature definition
+    else if(string_equal(tok, ":"))
+    {
+      if (queue_empty(Q))
+      {
+        error("no content for definition");
+      }
+      string name = deq(Q);
+      if (string_equal(name, ";"))
+      {
+        error("no content for definition");
+      }
+      queue_t def = def_queue(name, Q);
+      dict_insert(ST->dict, name, def);
+    }
+
+    else if (dict_lookup(ST->dict, tok)!=NULL)
+    {
+      queue_t tmp_def = queue_read_only_copy(dict_lookup(ST->dict,tok));
+      if (!queue_empty(Q))
+      {
+        qpush(ST->r_stack, Q);
+      } 
+      Q = tmp_def;
+    }
+
+
+    else
+    {
       /* Not defined as an operation name, should be an int */
       int* p = parse_int(tok, 10);
-      if (p == NULL) { /* not an int */
+      if (p == NULL) 
+      { /* not an int */
         /* call error(msg) which prints msg and aborts */
         error(string_join("undefined token ", tok));
       }
       push(S, *p);
     }
+
+
+    if(queue_empty(Q) && !qstack_empty(ST->r_stack))
+    {
+      Q = qpop(ST->r_stack);
+    }
   }
+  
 
   /* When you return "true", don't pop anything off the stack! When we
    * grade your function, we'll check that the stack contains the
