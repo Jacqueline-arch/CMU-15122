@@ -1,0 +1,82 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <rand>
+#use <util>
+#use <string>
+#use <conio>
+#use <file>
+
+// You are welcome to define helper functions for your tests
+bool test(bloom_t B, string s, bool real)
+{
+  bool a = bloom_contains(B, s);
+  // printf("%s\n", string_frombool(a));
+  if (! a) return a == real;
+  //@assert a == true;
+  return a;
+}
+
+void infill_bloom(bloom_t B) {
+  file_t stud = file_read("data/dictionary.txt");
+  if (stud == NULL)
+  {
+    error("data/dictionary.txt does not exist");
+  }
+  int i = 0;
+  while (i < 100 && !file_eof(stud)) {
+    string line = file_readline(stud);
+    bloom_add(B, line);
+    i ++;   
+  }
+  file_close(stud);
+}
+
+int number_of_false(bloom_t B) {
+  int ans = 0;
+
+  file_t stud = file_read("data/dictionary.txt");
+  if (stud == NULL)
+  {
+    error("data/dictionary.txt does not exist");
+  }
+  int i = 0;
+  while (i < 200 && !file_eof(stud)) {
+    string line = file_readline(stud);
+    if (! bloom_contains(B, line)) {
+      ans ++;
+    }
+    i ++;   
+  }
+  file_close(stud);
+  return ans;
+}
+
+int main() {
+  // Create a few bloom filters to test CORRECTNESS: here, focus on raising
+  //      assertion errors on any incorrect implementation of the interface
+  bloom_t B1 = bloom_new(10);
+  bloom_add(B1, "red");
+  bloom_add(B1, "gray");
+  bloom_add(B1, "green");
+  assert(test(B1, "orange", false));
+  assert(test(B1, "black", false));
+  assert(test(B1, "white", false));
+  assert(test(B1, "red", true));
+  assert(test(B1, "", false));
+
+
+
+
+  printf("All correctness tests passed!\n\n");
+
+  // Create a few boom filters to test PERFORMANCE: this part should
+  //     compute and return a performance score between 0 and 100 that
+  //     assesses how bad or good a bloom filter implementation is
+  bloom_t B2 = bloom_new(50);
+  infill_bloom(B2);
+  int performance = number_of_false(B2);
+  printf("Returning the performance score.\n");
+  return performance;  // MODIFY ME
+}

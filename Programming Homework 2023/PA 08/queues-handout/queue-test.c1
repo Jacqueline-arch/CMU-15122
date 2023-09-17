@@ -1,0 +1,150 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <conio>
+#use <args>
+#use <string>
+#use <parse>
+
+// You are welcome to define helper functions for your tests
+
+// typedef struct list_node list;
+// struct list_node {
+//   void* data;
+//   list* next;
+// };
+
+// typedef struct queue_header queue;
+// struct queue_header {
+//   list* front;
+//   list* back;
+//   int size;
+// };
+
+
+void* data_create (int i) {
+  int* tmp = alloc(int);
+  *tmp = i;
+  return (void*)tmp;
+}
+
+list* node_create (void* data) {
+  list* node = alloc(list);
+  node->data = data;
+  return node;
+}
+
+list*[] nodes_create(int n) {
+  list*[] array = alloc_array(list*, n);
+  for (int i = 0; i < n; i ++) {
+    array[i] = node_create(data_create(i));
+  }
+  return array;
+}
+
+queue* queue_create(list*[] nodes, int n, int length)
+//@requires \length(nodes) == n;
+{
+  queue* Q = alloc(queue);
+  Q->size = length;
+  if (n == 0) {
+    Q->front = NULL;
+    Q->back = NULL;
+  }
+  else {
+    Q->front = nodes[0];
+    Q->back = nodes[n-1];
+    for(int i = 0; i < n-1; i++) {
+      nodes[i]->next = nodes[i+1];
+    }
+  }
+  return Q;
+}
+
+void printqueue(queue_t Q) {
+  list* node = Q->front;
+  while(node != NULL) {
+    printf("%d\n", *((int*)node->data));
+    node = node->next;
+  }
+}
+
+int main() {
+  // Create a few queues
+  queue* Q1 = queue_create(nodes_create(0), 0, 0);
+  queue* Q2 = queue_create(nodes_create(0), 0, 2);
+  queue* Q3 = queue_create(nodes_create(1), 1, 1);
+  queue* Q4 = queue_create(nodes_create(1), 1, 4);
+  queue* Q5 = queue_create(nodes_create(5), 5, 5);
+
+
+  queue_t Q6 = queue_new();
+
+  // Using them, test the functions you wrote in file queue.c1
+  args_t args = args_parse();
+
+  if (args->argc == 0) {
+  // These are the tests we expect to succeed
+  assert(is_queue(Q1));
+  assert(is_queue(Q3));
+  assert(is_queue(Q6));
+  assert(queue_size(Q6) == 0);
+  assert(queue_size(Q5) == 5);
+  enq(Q5, data_create(9));
+  assert(queue_size(Q5) == 6);
+  assert(queue_size(Q3) == 1);
+  deq(Q3);
+  assert(queue_size(Q3) == 0);
+  assert(is_queue(Q3));
+  enq(Q3, data_create(7));
+  enq(Q3, data_create(8));
+  assert(queue_size(Q3) == 2);
+  // printqueue(Q5);
+
+  assert(*(int*)queue_peek(Q5, 5)==9);
+  assert(*(int*)queue_peek(Q5, 0)==0);
+
+  queue_reverse(Q5);
+  // printqueue(Q5);
+
+  deq(Q3);
+  enq(Q3, data_create(10));
+  enq(Q3, data_create(12));
+  enq(Q3, data_create(14));
+  enq(Q3, data_create(16));
+  enq(Q3, data_create(18));
+  // printqueue(Q3);
+  assert(queue_size(Q3)== 6);
+  assert(queue_all(Q3, &even));
+  assert(queue_all(Q3, &incr));
+  // printqueue(Q3);
+  assert(queue_all(Q3, &odd));
+  enq(Q3, data_create(-8));
+  enq(Q3, data_create(-10));
+  enq(Q3, data_create(-12));
+  assert(*(int*)queue_iterate(Q3, NULL, &find_negative) == -8);
+  assert(queue_iterate(Q5, NULL, &find_negative) == NULL);
+  // printqueue(Q3);
+  queue_t Q7 = (queue_t)queue_iterate(Q3, (void*)queue_new(), &copy);
+  printqueue(Q7);
+
+
+  }
+  else if (args->argc == 1) {
+    // These are the tests we expect to fail
+    string arg = args->argv[0];
+    if (string_equal(arg, "err1")) {
+      //expect to fail as Q2->front is NULL but Q->size!= 0;
+      assert(is_queue(Q2));
+    } else if (string_equal(arg, "err2")) {
+      //expecct to fall as Q4->size != real queue length.
+      assert(is_queue(Q4));
+
+    }
+  }
+
+
+  printf("All tests passed!\n");
+  return 0;
+}

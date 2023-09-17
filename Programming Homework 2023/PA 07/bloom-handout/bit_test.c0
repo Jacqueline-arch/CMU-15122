@@ -1,0 +1,44 @@
+#use <rand>
+#use <util>
+#use <string>
+#use <conio>
+#use <file>
+
+
+bool get_bit(int[] A, int i)
+//@requires 0 <= i && i / 32 < \length(A);
+{
+  int array_index = i / 32;
+  int bit_index = i % 32;
+  int mask = 1 <<(32 - bit_index - 1);
+  int bit = (A[array_index] & mask) >> (32 - bit_index - 1);
+  if (bit == 0) return false;
+  return true;
+}
+
+int main(){
+
+    int[]A = alloc_array(int, 3);
+    A[0] = 0x00FF0000;
+    A[1] = 0x00FF0000;
+    A[2] = 0x000000FF;
+
+    // printf("%s\n", string_frombool(get_bit(A, 8)));
+    // printf("%s\n", string_frombool(get_bit(A, 7)));
+    // printf("%s\n", string_frombool(get_bit(A, 15)));
+    // printf("%s\n", string_frombool(get_bit(A, 16)));
+    // printf("%s\n", string_frombool(get_bit(A, 32))); //false
+    // printf("%s\n", string_frombool(get_bit(A, 40))); //true
+    // printf("%s\n", string_frombool(get_bit(A, 47))); //true
+    // printf("%s\n", string_frombool(get_bit(A, 48))); //false
+    // printf("%s\n", string_frombool(get_bit(A, 48))); //false
+    printf("%s\n", string_frombool(get_bit(A, 86))); //false
+    printf("%s\n", string_frombool(get_bit(A, 87))); //f
+    printf("%s\n", string_frombool(get_bit(A, 88))); //false
+    printf("%s\n", string_frombool(get_bit(A, 95))); //true
+
+    // printf("%s\n", string_frombool(get_bit(0xF, 29)));
+    // printf("%s\n", string_frombool(get_bit(0xF, 30)));
+    // printf("%s\n", string_frombool(get_bit(0xF, 31)));
+    return 0;
+}

@@ -1,0 +1,12 @@
+#use <string>
+
+int hash_string(string s) 
+{
+  int n = string_length(s); 
+  if (n == 0) return 0;
+  if (n == 1)
+  {
+    return char_ord(string_charat(s, 0));
+  }
+  return hash_string(string_sub(s, 0, n - 1)) * 31 + char_ord(string_charat(s, n - 1));
+}

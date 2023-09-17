@@ -1,0 +1,62 @@
+#use <string>
+#use <parse>
+#use <conio>
+#use <args>
+#use <util>
+
+bool check_stack_size(stack_t S, int n)
+//@requires S!= NULL;
+//@requires n > 0;
+{
+  stack_t tmp = stack_new();
+  while (!stack_empty(S) && n != 0)
+  //@loop_invariant n >= 0;
+  {
+    push(tmp, pop(S));
+    n --;
+  }
+  while(!stack_empty(tmp))
+  {
+    push(S, pop(tmp));
+  }
+  //@assert n >= 0 || stack_empty(S);
+  if (n == 0) return true;
+  else
+  {
+    error("not enough arguments");
+    return false;
+  }
+}
+
+
+string test(stack_t S)
+{
+  int n = 5;
+  if (check_stack_size(S, n))
+  {
+    return "this is true";
+  }
+  return "this is false";
+}
+
+void add_print(stack_t S, int n)
+{
+  push(S, n);
+  printf("%d\n", n);
+}
+
+int main()
+{
+  stack_t S = stack_new();
+  push(S, 9);
+  push(S, 8);
+  int n = 39;
+  add_print(S, n);
+  pop(S);
+  pop(S);
+  int x = pop(S);
+  printf("%d\n", x);
+
+
+  return 0;
+}

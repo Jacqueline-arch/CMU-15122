@@ -1,0 +1,195 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+/*
+ * Text buffers as doubly linked lists.
+ *
+ * 15-122 Principles of Imperative Computation */
+
+#use <conio>
+#use <util>
+#use <string>
+
+/*** Interface ***/
+
+typedef struct dll_node dll;
+struct dll_node {
+  dll* next;
+  char data;
+  dll* prev;
+};
+
+typedef struct tbuf_header tbuf;
+struct tbuf_header {
+  dll* start;  /* the fist node of the list (on the left)  */
+  dll* cursor; /* the position where the cursor is displayed */
+  dll* end;    /* the last node of the list (on the right) */
+};
+
+bool is_dll_segment(dll* start, dll* end)
+
+{
+  if (start == NULL || end == NULL)
+  {
+    return false;
+  }
+  if (start == end)
+  {
+    return true;
+  }
+  dll* cur = start->next;
+  dll* prev = start;
+  while (cur != NULL && cur->prev == prev)
+  {
+    if (cur == end)
+    {
+      return true;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  //@assert cur == NULL || cur->prev != prev;
+  return false;
+}
+
+bool cursor_on_the_path(dll* cursor, dll* start, dll* end)
+//@requires cursor != NULL && start != NULL && end != NULL;
+//@requires is_dll_segment(start, end);
+{
+  if(cursor == start)
+  {
+    return false;
+  }
+  if(cursor == end)
+  {
+    return true;
+  }
+  for (dll* a = start->next; a != end; a = a->next)
+  {
+    if(a == cursor)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool is_tbuf(tbuf* B)
+{
+  return B != NULL 
+      && B->start != B->end
+      && is_dll_segment(B->start, B->end)
+      && cursor_on_the_path(B->cursor, B->start, B->end);
+}
+
+
+ /* Returns true if the cursor       */
+ /* is in leftmost position          */
+bool tbuf_at_left(tbuf* B)
+//@requires B!=NULL;
+{
+  return B->cursor->prev == B->start;
+} 
+
+
+
+/* Returns true if the cursor       */
+ /* is in rightmost position         */
+bool tbuf_at_right(tbuf* B)  
+//@requires is_tbuf(B);    
+{
+  return B->cursor == B->end;
+}     
+
+
+/* Creates a new, empty text buffer */
+tbuf* tbuf_new() 
+//@ensures is_tbuf(\result); 
+{
+  tbuf* B = alloc(tbuf);
+  dll* node1 = alloc(dll);
+  dll* node2 = alloc(dll);
+  node1->next = node2;
+  node2->prev = node1;
+  B->start = node1;
+  B->end = node2;
+  B->cursor = node2;
+  return B;
+}
+
+void tbuf_forward(tbuf* B)            /* Moves the cursor forward (right) */
+//@requires is_tbuf(B);
+{
+  if(B->cursor != B->end)
+  {
+    B->cursor = B->cursor->next;
+  }
+}
+
+void tbuf_backward(tbuf* B)          /* Moves the cursor backward (left) */
+//@requires is_tbuf(B);
+{
+  if(B->cursor->prev!= B->start)
+  {
+    B->cursor = B->cursor->prev;
+  }
+}
+
+
+void tbuf_insert(tbuf* B, char c)     /* Insert a character before cursor */
+//@requires is_tbuf(B);
+//@ensures is_tbuf(B);
+{
+  dll* new_node = alloc(dll);
+  new_node ->data = c;
+  new_node->prev = B->cursor->prev;
+  B->cursor->prev->next = new_node;
+  new_node->next = B->cursor;
+  B->cursor->prev = new_node;
+}
+
+
+/* Remove character before cursor   */
+/* (and returns the deleted char)   */
+char tbuf_delete(tbuf* B)
+//@requires is_tbuf(B);
+//@ensures is_tbuf(B);
+{
+  char ans = B->cursor->prev->data;
+  dll* tmp = B->cursor->prev->prev;
+  tmp->next = B->cursor;
+  B->cursor->prev = tmp;
+  return ans;
+}          
+
+int tbuf_row(tbuf* B)                 /* Returns the row of the cursor    */
+//@requires B!=NULL;
+{
+  dll* tmp = B->cursor->prev;
+  int row = 1;
+  while (tmp != B->start)
+  {
+    if(tmp->data == '\n')
+    {
+      row ++;
+    }
+    tmp = tmp->prev;
+  }
+  return row;
+}
+
+int tbuf_col(tbuf* B)                 /* Returns the column of the cursor */
+//@requires B!=NULL;
+{
+  dll* tmp = B->cursor;
+  int col = 0;
+  while (tmp->prev != B->start && tmp->prev->data != '\n')
+  {
+    col ++;
+    tmp = tmp -> prev;
+  }
+  return col;
+}
+
+/*** Implementation ***/

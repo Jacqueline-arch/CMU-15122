@@ -1,0 +1,43 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <conio>
+
+int main() {
+  // Create a few arrays of integers
+
+  // Using them, test the functions test get_bit and set_bit
+
+  int[]A = alloc_array(int, 3);
+  A[0] = 0x00FF0000;
+  A[1] = 0x00FF0000;
+  A[2] = 0x000000FF;
+
+  // printf("%s\n", string_frombool(get_bit(A, 8)));
+  // printf("%s\n", string_frombool(get_bit(A, 7)));
+  // printf("%s\n", string_frombool(get_bit(A, 15)));
+  // printf("%s\n", string_frombool(get_bit(A, 16)));
+  // printf("%s\n", string_frombool(get_bit(A, 32))); //false
+  // printf("%s\n", string_frombool(get_bit(A, 40))); //true
+  // printf("%s\n", string_frombool(get_bit(A, 47))); //true
+  // printf("%s\n", string_frombool(get_bit(A, 48))); //false
+  // printf("%s\n", string_frombool(get_bit(A, 48))); //false
+  assert(get_bit(A, 86) == false); //false
+  assert(get_bit(A, 87)== false); //f
+  assert(get_bit(A, 88)== true); //false
+  assert(get_bit(A, 95)==true); //true
+  assert(get_bit(A, 63)==false);
+
+  set_bit(A, 63);
+  assert(get_bit(A,62) == false);
+  assert(get_bit(A, 63) == true);
+  assert(get_bit(A, 61) == false);
+
+  assert(get_bit(A, 64) == false);
+  set_bit(A, 64);
+  assert(get_bit(A, 64) == true);
+
+  printf("All tests passed!\n");
+  return 0;
+}

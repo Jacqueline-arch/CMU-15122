@@ -1,0 +1,78 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <conio>
+
+int main() {
+  // Create a few text buffers, some correct others incorrect
+  tbuf* TB = tbuf_new();
+  // char c1 = 'h';
+  // char c2 = 'e';
+  // char c3 = 'l';
+  // char c4 = 'l';
+  // char c5 = 'o';
+  // tbuf_insert(TB,c1);
+  // tbuf_insert(TB,c2);
+  // tbuf_insert(TB,c3);
+  // tbuf_insert(TB,c4);
+  // tbuf_insert(TB,c5);
+
+  /*test cursor is not on the path from start to end*/
+  // dll* wrong_cursor = alloc(dll);
+  // char cursor_data = 'w';
+  // wrong_cursor->data= cursor_data;
+  // wrong_cursor->next = TB->end;
+  // wrong_cursor->prev = TB->start;
+  // TB->cursor = wrong_cursor;
+  
+  /*test the prev links don't mirror the next links*/
+  // dll* a_node = alloc(dll);
+  // a_node->data='a';
+  // dll* b_node = alloc(dll);
+  // b_node->data='b';
+  // dll* c_node = alloc(dll);
+  // c_node->data = 'c';
+
+  // TB->start->next = a_node;
+  // a_node->prev = TB->start;
+  // a_node->next = b_node;
+  // b_node->prev = a_node;
+  // b_node->next = TB->end;
+  // TB->end->prev = c_node;
+  // c_node->next = TB->end;
+  // c_node->prev = a_node;
+
+  /*test start and end are not linked*/
+  dll* a_node = alloc(dll);
+  a_node->data='a';
+  dll* b_node = alloc(dll);
+  b_node->data='b';
+  dll* c_node = alloc(dll);
+
+
+  TB->start->next = a_node;
+  a_node->prev = TB->start;
+  a_node->next = b_node;
+  b_node->prev = a_node;
+ 
+  TB->end = c_node;
+
+
+
+  
+
+
+
+  // Using them, test your is_tbuf
+  printf("%c\n", TB->cursor->data);
+  assert(is_tbuf(TB));
+  
+  // assert(TB->cursor==TB->end); 
+  
+
+
+
+  printf("All tests passed!\n");
+  return 0;
+}

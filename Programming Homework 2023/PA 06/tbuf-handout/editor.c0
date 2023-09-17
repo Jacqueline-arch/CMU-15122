@@ -1,0 +1,183 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+/*
+ * Augment doubly linked lists with row and column information.
+ *
+ * 15-122 Principles of Imperative Computation */
+
+/*** Interface ***/
+
+typedef struct editor_header editor;
+struct editor_header {
+  tbuf* buffer;
+  int row;
+  int col;
+};
+
+bool is_editor(editor* E)
+{
+  return E != NULL
+      && is_tbuf(E->buffer)
+      && E->row == tbuf_row(E->buffer)
+      && E->col == tbuf_col(E->buffer);
+}
+
+editor* editor_new();                  /* Creates a new, empty text buffer */
+void editor_forward(editor* E);        /* Moves the cursor forward (right) */
+void editor_backward(editor* E);       /* Moves the cursor backward (left) */
+void editor_insert(editor* E, char c); /* Insert a character before cursor */
+void editor_delete(editor* E);         /* Remove character before cursor   */
+void editor_up(editor* E);             /* Moves the cursor up              */
+void editor_down(editor* E);           /* Moves the cursor down            */
+
+/*** Implementation ***/
+editor* editor_new()
+//@ensures is_editor(\result);
+{
+  editor* E = alloc(editor);
+  tbuf* TB = tbuf_new();
+  int r = 1;
+  int c = 0;
+  E->buffer = TB;
+  E->row = r;
+  E->col = c;
+  return E;
+}
+
+void editor_forward(editor* E)
+//@requires is_editor(E);
+{
+  if (! tbuf_at_right(E->buffer))
+  {
+    tbuf_forward(E->buffer);
+    if (E->buffer->cursor->prev->data == '\n')
+    {
+      E->row ++;
+      E->col = 0;
+    }
+    else
+    {
+      E->col ++;
+    }
+  }
+}
+
+
+void editor_backward(editor* E)
+//@requires is_editor(E);
+{
+  if (! tbuf_at_left(E->buffer))
+  {
+    tbuf_backward(E->buffer);
+    if(E->col == 0)
+    {
+      E->col = tbuf_col(E->buffer);
+      E->row --;
+    }
+    else
+    {
+      E->col --;
+    }
+  }
+}
+
+
+void editor_delete(editor* E)
+//@requires is_editor(E);
+{
+  if (!tbuf_at_left(E->buffer))
+  {
+    char deleted = tbuf_delete(E->buffer); 
+    if(deleted =='\n')
+    {
+      E->row --;
+      E->col = tbuf_col(E->buffer);
+    }
+    else
+    {
+      E->col --;
+    }
+  }
+}
+
+void editor_insert(editor*E, char c)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+  tbuf_insert(E->buffer, c);
+  if (c == '\n')
+  {
+    E->row ++;
+    E->col = 0;
+  }
+  else
+  {
+    E->col ++;
+  }
+}
+
+// Bonus: Implement these function is you do the bonus task
+void editor_up(editor* E)
+//@requires is_editor(E);
+{
+  if(E->row != 1)
+  {
+    dll* tmp1 = E->buffer->cursor->prev;
+    while(tmp1->data != '\n')
+    {
+      tmp1 = tmp1->prev;
+    }
+    //@assert tmp1->data == '\n';
+    int ct = 0;
+    dll* tmp2 = tmp1->prev;
+    while(tmp2->data != '\n' && tmp2 != E->buffer->start)
+    {
+      ct ++;
+      tmp2 = tmp2->prev; 
+    }
+    //@assert tmp2->data == '\n' || tmp2 == E->buffer->start;
+    if(ct < E->col)
+    {
+      E->buffer->cursor = tmp1;
+      E->col = ct;
+    }
+    else{
+      for (int i = 0; i <= E->col; i++)
+      {
+        tmp2 = tmp2->next;
+      }
+      E->buffer->cursor = tmp2;
+    }
+    E->row --;
+  }
+ } 
+
+ 
+void editor_down(editor* E)
+//@requires is_editor(E);
+{
+  dll* tmp = E->buffer->cursor;
+  while(tmp->data != '\n' && tmp != E->buffer->end)
+  {
+    tmp = tmp->next;
+  }
+  //@assert tmp->data == '\n'||tmp == E->buffer->end;
+  if (tmp->data =='\n')
+  {
+    tmp = tmp->next;
+    int i = 0;
+    while(i<E->col && tmp!=E->buffer->end && tmp->data != '\n')
+    {
+      tmp = tmp->next;
+      i ++;
+    }
+    E->buffer->cursor = tmp;
+    E->row++;
+    if(i < E->col)
+    {
+      E->col = i;
+    }
+  }
+ }

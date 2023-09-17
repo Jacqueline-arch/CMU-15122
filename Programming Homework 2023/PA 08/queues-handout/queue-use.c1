@@ -1,0 +1,59 @@
+#use <conio>
+
+bool even(void* x)
+//@requires x!=NULL;
+//@requires \hastag(int*, x);
+{
+  int tmp = *((int*)x);
+  return 0<=tmp && tmp% 2==0;
+}
+
+bool odd(void* x)
+//@requires x==NULL || \hastag(int*, x);
+{
+  if (x == NULL) return true;
+  int tmp = *(int*)x; 
+  return 0<tmp && tmp% 2==1;
+}
+
+bool incr(void* x)
+//@requires x==NULL || \hastag(int*, x);
+{
+  if (x != NULL) {
+    (*(int*)x)++;
+  }
+  return true;
+}
+
+
+void* find_negative(void* accum, void*x)
+//@requires x == NULL || \hastag(int*, x);
+//@ensures \hastag(int*, \result);
+{
+  if (x != NULL && accum == NULL && *(int*)x < 0) {
+    accum = x;
+  }
+  return accum;
+}
+
+void* copy(void*accum, void*x)
+//@requires x == NULL || \hastag(int*, x);
+//@requires \hastag(queue_t, accum);
+//@ensures \hastag(queue_t, \result);
+{
+  enq((queue_t)(accum), x);
+  return accum;
+}
+
+void* insert(void* x, void* y)
+//@requires x!=NULL && \hastag(int*, x);
+//@requires y!=NULL && \hastag(int*, y);
+{
+  int x1 = *(int*)x;
+  int y1 = *(int*)y;
+  if (y1 > x1) {
+    *(int*)x = y1;
+    *(int*)y = x1;
+  }
+  return x;
+}

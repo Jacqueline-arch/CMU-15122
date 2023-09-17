@@ -1,0 +1,37 @@
+/**************************************************************************/
+/*              COPYRIGHT Carnegie Mellon University 2023                 */
+/* Do not post this file or any derivative on a public site or repository */
+/**************************************************************************/
+#use <string>
+#use <conio>
+
+// You are welcome to define helper functions for your tests
+
+int main() {
+  // Create a password database and check a few passwords against it.
+  // Use pwd_stats to make sure the stats are updated correctly.
+  pwd_t P = pwd_new(3, "data/20-badpwd.txt");
+  string s1 = "12345";
+  string s2 = "password123";
+  string s3 = "password1234";
+  string s4 = "sunjunkun";
+  assert(pwd_check(P, s1) == 0);  
+  assert(pwd_check(P, s2) == 0);
+  assert(pwd_check(P, s4) == 2);
+  assert(pwd_check(P, s3) == 2);
+  assert(P->checks == 4);
+  assert(P->truepos == 2);
+  assert(P->trueneg == 2);
+  assert(P->falsepos == 0);
+
+  printf("%s\n", string_frombool(pwd_quickcheck(P,"12345678901")));
+
+  
+
+
+
+
+
+  printf("All correctness tests passed!\n\n");
+  return 0;
+}

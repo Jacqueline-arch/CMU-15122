@@ -1,0 +1,3 @@
+: dup 1 pick ;
+: helper swap 2 pick % gcd ;
+: gcd dup if helper 3 skip drop dup print;

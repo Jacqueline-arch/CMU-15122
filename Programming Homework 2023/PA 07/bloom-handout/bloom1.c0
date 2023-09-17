@@ -1,0 +1,62 @@
+#use <conio>
+#use <util>
+#use <string>
+
+/*****Library Implementation*****/
+typedef struct bloom_filter bloom;
+struct bloom_filter{
+    int capacity;
+    bool[] data;
+};
+
+//helper functions
+bool is_bloom(bloom* B)
+//@requires B != NULL;
+//@requires \length(B->data) == B->capacity;
+{
+  return 0 < B->capacity && B->capacity < int_max()/4;
+}
+
+int hash_string(string s) 
+{
+  int n = string_length(s); 
+  if (n == 0) return 0;
+  if (n == 1)
+  {
+    return char_ord(string_charat(s, 0));
+  }
+  return hash_string(string_sub(s, 0, n - 1)) * 31 
+        + char_ord(string_charat(s, n - 1));
+}
+
+
+bloom* bloom_new(int x)
+//@requires 0 < x && x < int_max()/4;
+//@ensures is_bloom(\result);
+{
+  bloom* B = alloc(bloom);
+  B->capacity = x;
+  B->data = alloc_array(bool, x);
+  return B;
+}
+
+bool bloom_contains(bloom* B, string s)
+//@requires is_bloom(B);
+//@ensures is_bloom(B);
+{
+  int index = abs(hash_string(s) % B->capacity);
+  return B->data[index];
+}
+
+
+
+void bloom_add(bloom* B, string s)
+//@requires is_bloom(B);
+//@ensures is_bloom(B);
+//@ensures bloom_contains(B, s);
+{
+  int index = abs(hash_string(s) % B->capacity);
+  B->data[index] = true;
+}
+
+typedef bloom* bloom_t;
